@@ -14,7 +14,6 @@ export const createViz = (margins = {top:20, right: 20, bottom: 20, left: 20}) =
         if (outerHeight) return $outerHeight - margins.left - margins.right
     })
 
-
     // INITIAL CONTENT
     const { subscribe, update } = writable(
         {

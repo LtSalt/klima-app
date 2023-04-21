@@ -12,12 +12,6 @@ export async function load() {
         return await prisma.Periodic_Annual.findMany({
             where: {
                 period: "2018-2022"
-            },
-            select: {
-                ars: true,
-                period: true,
-                temp: true,
-                temp_dev: true
             }
         })
     }

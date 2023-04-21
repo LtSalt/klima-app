@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Annual {
+  ars        String
+  year       Int
+  temp       Float?
+  precip     Float?
+  temp_dev   Float?
+  precip_dev Float?
+  District   District @relation(fields: [ars], references: [ars])
+
+  @@unique([ars, year])
+}
+
+model District {
+  ars              String             @id
+  name             String
+  region           String
+  Annual           Annual[]
+  Monthly          Monthly[]
+  Periodic_Annual  Periodic_Annual[]
+  Periodic_Monthly Periodic_Monthly[]
+}
+
+model Geometry {
+  level   String @id
+  geojson Json?  @db.Json
+}
+
+model Monthly {
+  ars        String
+  year       Int
+  month      Int
+  temp       Float?
+  precip     Float?
+  temp_dev   Float?
+  precip_dev Float?
+  District   District @relation(fields: [ars], references: [ars])
+
+  @@unique([ars, year, month])
+}
+
+model Periodic_Annual {
+  ars        String
+  period     String
+  temp       Float?
+  precip     Float?
+  temp_dev   Float?
+  precip_dev Float?
+  District   District @relation(fields: [ars], references: [ars])
+
+  @@unique([ars, period])
+}
+
+model Periodic_Monthly {
+  ars        String
+  period     String
+  month      Int
+  temp       Float?
+  precip     Float?
+  temp_dev   Float?
+  precip_dev Float?
+  District   District @relation(fields: [ars], references: [ars])
+
+  @@unique([ars, period, month])
+}

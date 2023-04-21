@@ -1,6 +1,6 @@
 // probably better to move "create" to store setup, providing params
 
-import { writable, derived } from "svelte/store";
+import { writable, derived, get } from "svelte/store";
 
 export const createViz = (margins = {top:20, right: 20, bottom: 20, left: 20}) => {
 
@@ -42,11 +42,20 @@ export const createViz = (margins = {top:20, right: 20, bottom: 20, left: 20}) =
         update((that) => {
             that.outerWidth.update(() => width)
             that.outerHeight.update(() => height)
-            return that
+
+            return {...that} 
         })
 
+        
     }
+    const _transformToCenter = (entries) => {
+        const element = entries[0].target
+        const width = get(innerWidth)
+        const height = get(innerHeight)
 
+        element.setAttribute("transform", `translate(${width / 2}, ${height / 2})`)
+    }
+    
     // PUBLIC METHODS
     const container = (element) => {
         new ResizeObserver(_watchDims).observe(element);
@@ -70,6 +79,33 @@ export const createViz = (margins = {top:20, right: 20, bottom: 20, left: 20}) =
                       return geoPath(projection().fitSize([$innerWidth, $innerHeight], params.fit));
                 })
             return {...that, path}
+            })
+        }
+        if (params.type === "donut") {
+            new ResizeObserver(_transformToCenter).observe(element);
+            // element.setAttribute("transform", `translate(${margins.left}, ${margins.top})`)
+
+            const { pie, arc } = (await import("d3"))
+            const makeArc = arc()
+            const { data, fraction } = params
+            const slices = derived(
+                [innerWidth, innerHeight], 
+                ([$innerWidth, $innerHeight]) => {
+                    const radius = Math.min($innerWidth, $innerHeight) / 2;
+                    const specs = pie().value(d => d)(data).map(({ startAngle, endAngle }) => {
+                        return {
+                            innerRadius: radius * fraction,
+                            outerRadius: radius,
+                            startAngle,
+                            endAngle
+                        }
+                    })
+                    return specs.map(d => makeArc(d))
+                }
+            )
+            update(that => {
+                console.log("updating")
+                return {...that, slices}
             })
         }
     }

@@ -1,5 +1,5 @@
 <script>
-	import { scaleThreshold, schemeOranges } from 'd3';
+	import { create, scaleThreshold, schemeOranges, arc } from 'd3';
 	import { createViz } from '$lib/stores/viz.js';
 	import { prepareMapData } from '$lib/helpers.js';
 
@@ -12,10 +12,27 @@
 	const map = createViz();
 	$: mapPath = $map.path;
 
+	const donut = createViz();
+	$: ({ slices } = $donut);
+	const templates = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
 	const fillScale = scaleThreshold([1, 1.5, 2, 2.5, 3, 3.5], schemeOranges[7]);
 </script>
 
 <section id="graphics" class="grid gap-4 border-4 p-4 md:grid-cols-2">
+	<div use:donut.container class="aspect-square border border-slate-500">
+		<svg use:donut.svg>
+			<g use:donut.g>
+				<g use:donut.create={{ type: 'donut', data: Array(12).fill(1), fraction: 2 / 3 }}>
+					{#if $slices}
+						{#each templates as template}
+							<path d={$slices[template - 1]} class="fill-none stroke-black" />
+						{/each}
+					{/if}
+				</g>
+			</g>
+		</svg>
+	</div>
 	<div use:map.container class="aspect-square border border-slate-500">
 		<svg use:map.svg>
 			<g use:map.g>
